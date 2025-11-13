@@ -56,13 +56,6 @@ venv.bak/
 Thumbs.db
 *:Zone.Identifier
 
-# Plots and outputs
-*.png
-*.jpg
-*.pdf
-results/
-logs/
-
 # Old files
 *.bak
 *.old
