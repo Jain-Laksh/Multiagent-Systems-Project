@@ -1,8 +1,11 @@
 """
-Utility functions for training and visualization.
+Utilities module for visualization and helper functions
 """
 
-from .helpers import one_hot
-from .visualization import plot_training_curves, smooth, print_final_results, plot_comparative_analysis
+from .visualization import plot_rewards, plot_rolling_average, plot_training_summary
 
-__all__ = ['one_hot', 'plot_training_curves', 'smooth', 'print_final_results', 'plot_comparative_analysis']
+__all__ = [
+    'plot_rewards',
+    'plot_rolling_average',
+    'plot_training_summary'
+]

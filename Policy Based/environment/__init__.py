@@ -1,7 +1,7 @@
 """
-Environment module for reinforcement learning.
+Environment module for CartPole-v1
 """
 
-from .gridworld import GridWorld
+from .cartpole_env import CartPoleEnv
 
-__all__ = ['GridWorld']
+__all__ = ['CartPoleEnv']
