@@ -20,14 +20,13 @@ class ActorNetwork(nn.Module):
         Args:
             input_dim (int): Dimension of input (state space)
             output_dim (int): Dimension of output (action space)
-            hidden_dim_1 (int): Number of neurons in first hidden layer
-            hidden_dim_2 (int): Number of neurons in second hidden layer
+            hidden_dim_1 (int): Number of neurons in first hidden layer (hidden_dim_2 not used, kept for compatibility)
         """
         super(ActorNetwork, self).__init__()
         
         self.fc1 = nn.Linear(input_dim, hidden_dim_1)
-        self.fc2 = nn.Linear(hidden_dim_1, hidden_dim_2)
-        self.fc3 = nn.Linear(hidden_dim_2, output_dim)
+        self.fc2 = nn.Linear(hidden_dim_1, output_dim)
+        self.dropout = nn.Dropout(p=0.6)
     
     def forward(self, x):
         """
@@ -40,8 +39,8 @@ class ActorNetwork(nn.Module):
             torch.Tensor: Action probabilities (after softmax)
         """
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
         return F.softmax(x, dim=-1)
 
 
@@ -56,14 +55,12 @@ class CriticNetwork(nn.Module):
         
         Args:
             input_dim (int): Dimension of input (state space)
-            hidden_dim_1 (int): Number of neurons in first hidden layer
-            hidden_dim_2 (int): Number of neurons in second hidden layer
+            hidden_dim_1 (int): Number of neurons in first hidden layer (hidden_dim_2 not used, kept for compatibility)
         """
         super(CriticNetwork, self).__init__()
         
         self.fc1 = nn.Linear(input_dim, hidden_dim_1)
-        self.fc2 = nn.Linear(hidden_dim_1, hidden_dim_2)
-        self.fc3 = nn.Linear(hidden_dim_2, 1)
+        self.fc2 = nn.Linear(hidden_dim_1, 1)
     
     def forward(self, x):
         """
@@ -76,5 +73,4 @@ class CriticNetwork(nn.Module):
             torch.Tensor: State value estimate
         """
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        return self.fc3(x)
+        return self.fc2(x)

@@ -126,12 +126,10 @@ class REINFORCEBaselineAgent:
         values = self.value(states_tensor).squeeze()
         
         # Calculate advantages (returns - baseline)
+        # Detach values from graph because we don't want to update Value net via Actor loss
         advantages = returns - values.detach()
         
-        # Normalize advantages
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-        
-        # Calculate policy loss with baseline
+        # Calculate policy loss with baseline (no normalization of advantages)
         policy_loss = []
         for log_prob, advantage in zip(self.log_probs, advantages):
             policy_loss.append(-log_prob * advantage)

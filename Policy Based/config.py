@@ -18,13 +18,13 @@ class Config:
     HIDDEN_DIM_2 = 128
     
     # Training hyperparameters
-    ACTOR_LEARNING_RATE = 0.0001  # Learning rate for policy (actor)
-    CRITIC_LEARNING_RATE = 0.0001  # Learning rate for value function (critic/baseline)
+    ACTOR_LEARNING_RATE = 0.001  # Learning rate for policy (actor)
+    CRITIC_LEARNING_RATE = 0.005  # Learning rate for value function (critic/baseline)
     GAMMA = 0.99  # Discount factor
     ENTROPY_COEF = 0.01  # Entropy coefficient for exploration
     
     # Training settings
-    NUM_EPISODES = 500
+    NUM_EPISODES = 200  # Match the reference script
     MAX_STEPS_PER_EPISODE = 500
     
     # Logging and saving

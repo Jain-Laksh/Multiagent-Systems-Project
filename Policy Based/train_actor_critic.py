@@ -47,15 +47,15 @@ def train():
         
         while not done and step_count < config.MAX_STEPS_PER_EPISODE:
             # Select action
-            action, log_prob, entropy = agent.select_action(state, training=True)
+            action, log_prob = agent.select_action(state, training=True)
             
             # Take action in environment
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             total_reward += reward
             
-            # Train the agent (Actor-Critic update)
-            actor_loss, critic_loss = agent.train_step(state, action, reward, next_state, done, log_prob, entropy)
+            # Train the agent (Actor-Critic online update)
+            actor_loss, critic_loss = agent.train_step(state, action, reward, next_state, done, log_prob)
             
             # Update state
             state = next_state

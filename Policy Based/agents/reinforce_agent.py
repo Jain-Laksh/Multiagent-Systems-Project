@@ -110,7 +110,8 @@ class REINFORCEAgent:
         
         # Convert to tensor and normalize
         returns = torch.tensor(returns, dtype=torch.float32).to(self.device)
-        returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+        # Normalize returns (Crucial for Vanilla REINFORCE stability)
+        returns = (returns - returns.mean()) / (returns.std() + 1e-9)
         
         # Calculate policy loss
         policy_loss = []
