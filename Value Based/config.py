@@ -1,15 +1,8 @@
-"""
-Configuration file for value-based RL agents (DQN, Double DQN, SARSA) on CartPole-v1
-Contains all hyperparameters and environment settings
-Shared across all three implementations
-"""
-
 class Config:
-    """Configuration class for DQN, Double DQN, and SARSA agents"""
     
     # Environment settings
     ENV_NAME = "CartPole-v1"
-    RENDER_MODE = "rgb_array"  # Use 'human' for visualization during training
+    RENDER_MODE = "rgb_array"  
     
     # Network architecture
     INPUT_DIM = 4  # CartPole observation space dimension

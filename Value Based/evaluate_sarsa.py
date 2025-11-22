@@ -1,8 +1,3 @@
-"""
-Evaluation script for trained SARSA agent
-Tests the agent's performance on CartPole-v1
-"""
-
 import os
 import time
 import numpy as np
@@ -14,38 +9,18 @@ from agents.sarsa_agent import SARSAAgent
 
 
 def evaluate(model_path=None, render=True, num_episodes=10):
-    """
-    Evaluate a trained SARSA agent
-    
-    Args:
-        model_path (str): Path to the saved model. If None, uses the final model.
-        render (bool): Whether to render the environment
-        num_episodes (int): Number of episodes to evaluate
-    """
-    # Initialize configuration
     config = Config()
-    
-    # Set model path
     if model_path is None:
         model_path = os.path.join(config.MODEL_SAVE_PATH, "sarsa_model_final.pth")
-    
     if not os.path.exists(model_path):
         print(f"Error: Model file not found at {model_path}")
         print("Please train the model first using train_sarsa.py")
         return
-    
-    # Initialize environment with rendering if requested
     render_mode = "human" if render else "rgb_array"
     env = CartPoleEnv(config.ENV_NAME, render_mode)
-    
-    # Initialize agent
     agent = SARSAAgent(env.input_dim, env.output_dim, config)
-    
-    # Load the trained model
     agent.load_model(model_path)
     print(f"\nLoaded model from: {model_path}")
-    
-    # Evaluation metrics
     episode_rewards = []
     episode_lengths = []
     
@@ -62,20 +37,13 @@ def evaluate(model_path=None, render=True, num_episodes=10):
             while not done:
                 if render:
                     env.render()
-                    time.sleep(0.01)  # Small delay for better visualization
-                
-                # Select action (greedy, no exploration)
+                    time.sleep(0.01)
                 action = agent.select_action(state, training=False)
-                
-                # Take action in environment
                 next_state, reward, terminated, truncated, info = env.step(action)
                 done = terminated or truncated
                 total_reward += reward
                 step_count += 1
-                
                 state = next_state
-                
-                # Print step information
                 if render:
                     print(f"Step {step_count}: Action={action}, Reward={reward:.2f}, "
                           f"Terminated={terminated}, Truncated={truncated}")
@@ -89,12 +57,8 @@ def evaluate(model_path=None, render=True, num_episodes=10):
             print(f"\nEpisode {episode + 1}/{num_episodes}")
             print(f"  Total Reward: {total_reward:.2f}")
             print(f"  Episode Length: {step_count} steps")
-            
     finally:
-        # Always close the environment
         env.close()
-    
-    # Print evaluation summary
     print("\n" + "=" * 60)
     print("Evaluation Complete!")
     print("=" * 60)

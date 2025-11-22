@@ -1,8 +1,3 @@
-"""
-Training script for SARSA on CartPole-v1
-Main entry point for training the agent
-"""
-
 import os
 import numpy as np
 from tqdm import tqdm
@@ -14,66 +9,34 @@ from utils.visualization import plot_rewards, plot_rolling_average, plot_trainin
 
 
 def train():
-    """
-    Main training function for SARSA agent
-    """
-    # Initialize configuration
     config = Config()
-    
-    # Create necessary directories
     os.makedirs(config.MODEL_SAVE_PATH, exist_ok=True)
     os.makedirs(config.PLOT_SAVE_PATH, exist_ok=True)
-    
-    # Initialize environment
     env = CartPoleEnv(config.ENV_NAME, config.RENDER_MODE)
     print(f"Environment: {config.ENV_NAME}")
     print(f"State space: {env.input_dim}, Action space: {env.output_dim}")
-    
-    # Initialize agent
     agent = SARSAAgent(env.input_dim, env.output_dim, config)
-    
-    # Training metrics
     episode_rewards = []
     
     print(f"\nStarting SARSA training for {config.NUM_EPISODES} episodes...")
     print("-" * 60)
-    
-    # Training loop
     for episode in tqdm(range(config.NUM_EPISODES), desc="Training Progress"):
         state, _ = env.reset()
         done = False
         total_reward = 0
         step_count = 0
-        
-        # Select initial action using epsilon-greedy policy (on-policy)
         action = agent.select_action(state, training=True)
-        
         while not done:
-            # Take action in environment
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             total_reward += reward
-            
-            # Select next action using epsilon-greedy policy (on-policy)
-            # This is the key difference from Q-learning/DQN
             next_action = agent.select_action(next_state, training=True)
-            
-            # Train the agent using SARSA update
-            # Q(s,a) <- Q(s,a) + α[r + γQ(s',a') - Q(s,a)]
             loss = agent.train_step(state, action, reward, next_state, next_action, done)
-            
-            # Update state and action for next iteration
             state = next_state
-            action = next_action  # Use the already selected next action (on-policy)
+            action = next_action
             step_count += 1
-        
-        # Store episode reward
         episode_rewards.append(total_reward)
-        
-        # Decay epsilon
         agent.decay_epsilon()
-        
-        # Log progress
         if (episode + 1) % config.LOG_INTERVAL == 0:
             avg_reward = np.mean(episode_rewards[-config.LOG_INTERVAL:])
             print(f"\nEpisode {episode + 1}/{config.NUM_EPISODES}")
@@ -81,26 +44,16 @@ def train():
             print(f"  Average Reward (last {config.LOG_INTERVAL}): {avg_reward:.2f}")
             print(f"  Epsilon: {agent.epsilon:.4f}")
             print(f"  Steps: {step_count}")
-        
-        # Save model periodically
         if (episode + 1) % config.SAVE_INTERVAL == 0:
             model_path = os.path.join(config.MODEL_SAVE_PATH, f"sarsa_model_episode_{episode + 1}.pth")
             agent.save_model(model_path)
-    
-    # Close environment
     env.close()
-    
-    # Save final model
     final_model_path = os.path.join(config.MODEL_SAVE_PATH, "sarsa_model_final.pth")
     agent.save_model(final_model_path)
-    
-    # Generate and save plots
     print("\nGenerating training plots...")
     plot_rewards(episode_rewards, config.PLOT_SAVE_PATH, filename="sarsa_rewards.png")
     plot_rolling_average(episode_rewards, window=100, save_path=config.PLOT_SAVE_PATH, filename="sarsa_rolling_average.png")
     plot_training_summary(episode_rewards, config.PLOT_SAVE_PATH, filename="sarsa_training_summary.png")
-    
-    # Print training summary
     print("\n" + "=" * 60)
     print("Training Complete!")
     print("=" * 60)

@@ -43,18 +43,6 @@ Value Based/
 └── QUICK_START.md               # Quick start guide
 ```
 
-## Features
-
-- **Modular Design**: Clean separation of concerns with dedicated modules
-- **Three Algorithms**: DQN, Double DQN, and SARSA implementations
-- **Experience Replay**: Efficient replay buffer for off-policy methods
-- **Soft Target Updates**: Smooth target network updates (DQN/Double DQN)
-- **Epsilon-Greedy Exploration**: Decaying epsilon for exploration-exploitation tradeoff
-- **Comprehensive Logging**: Progress tracking and model checkpointing
-- **Visualization**: Automated generation of training plots and metrics
-- **GPU Support**: Automatic detection and usage of CUDA if available
-- **Comparison Tools**: Compare performance across all algorithms
-
 ## Installation
 
 Install the required dependencies:
@@ -101,70 +89,104 @@ python evaluate_dqn.py
 python evaluate_dqn.py --model saved_models/dqn_model_episode_1000.pth --episodes 20 --no-render
 ```
 
-### Comparison
-
-Compare all three algorithms:
-
-```bash
-python compare_all_agents.py
-```
-
 ## Algorithm Comparison
 
-### DQN (Off-Policy)
+### DQN (Deep Q-Network) - Off-Policy
 - **Learning**: Uses experience replay to learn from past experiences
-- **Target**: Uses target network for both action selection and evaluation
-- **Update**: `Q_target = r + γ * max_a' Q_target(s', a')`
-- **Pros**: Sample efficient, can reuse experiences
-- **Cons**: Can overestimate Q-values
+- **Target Network**: Uses target network for both action selection and evaluation
+- **Update Rule**: `Q_target = r + γ * max_a' Q_target(s', a')`
+- **Advantages**:
+  - Sample efficient through experience replay
+  - Can reuse past experiences
+  - Stable learning with target network
+- **Disadvantages**:
+  - Can overestimate Q-values
+  - Max operator introduces positive bias
 
-### Double DQN (Off-Policy)
+### Double DQN - Off-Policy
 - **Learning**: Uses experience replay like DQN
-- **Target**: Decouples action selection (online network) from evaluation (target network)
-- **Update**: `Q_target = r + γ * Q_target(s', argmax_a' Q_online(s', a'))`
-- **Pros**: Reduces overestimation bias, more stable learning
-- **Cons**: Slightly more complex than DQN
+- **Target Network**: Decouples action selection (online network) from evaluation (target network)
+- **Update Rule**: `Q_target = r + γ * Q_target(s', argmax_a' Q_online(s', a'))`
+- **Advantages**:
+  - Reduces overestimation bias
+  - More stable learning than DQN
+  - Better performance on complex tasks
+- **Disadvantages**:
+  - Slightly more complex implementation
+  - Similar computational cost to DQN
 
-### SARSA (On-Policy)
-- **Learning**: Learns from sequential experience (no replay buffer)
+### SARSA (State-Action-Reward-State-Action) - On-Policy
+- **Learning**: Learns from sequential experience without replay buffer
 - **Target**: Uses actual next action from current policy
-- **Update**: `Q(s,a) ← Q(s,a) + α[r + γQ(s',a') - Q(s,a)]`
-- **Pros**: Accounts for exploration in learning, more conservative
-- **Cons**: Less sample efficient, can be slower to converge
+- **Update Rule**: `Q(s,a) ← Q(s,a) + α[r + γQ(s',a') - Q(s,a)]`
+- **Advantages**:
+  - Accounts for exploration in learning
+  - More conservative and safer
+  - Simpler implementation (no replay buffer)
+- **Disadvantages**:
+  - Less sample efficient
+  - Can be slower to converge
+  - Cannot reuse past experiences
+
+### Key Differences
+
+| Feature | DQN | Double DQN | SARSA |
+|---------|-----|------------|-------|
+| Policy | Off-policy | Off-policy | On-policy |
+| Experience Replay | Yes | Yes | No |
+| Target Network | Yes | Yes | No |
+| Q-value Bias | Overestimation | Reduced | Minimal |
+| Sample Efficiency | High | High | Lower |
+| Convergence | Fast | Fast | Moderate |
+| Exploration Handling | Separate | Separate | Integrated |
 
 ## Configuration
 
 All hyperparameters are in `config.py`:
 
+### Network Architecture
 ```python
-# Network architecture
-HIDDEN_DIM_1 = 64
-HIDDEN_DIM_2 = 64
+HIDDEN_DIM_1 = 64  # First hidden layer size
+HIDDEN_DIM_2 = 64  # Second hidden layer size
+```
 
-# Training hyperparameters
+### Training Parameters
+```python
 LEARNING_RATE = 0.0001
-GAMMA = 0.9  # Discount factor
-
-# Exploration
-EPSILON_START = 1.0
-EPSILON_DECAY = 0.995
-EPSILON_MIN = 0.0001
-
-# Training settings
+GAMMA = 0.9           # Discount factor
 NUM_EPISODES = 1200
 BATCH_SIZE = 64
 BUFFER_SIZE = 10000
-TAU = 0.01  # Soft update parameter
+TAU = 0.01            # Soft update parameter for target network
 ```
 
-## Expected Performance
+### Exploration Parameters
+```python
+EPSILON_START = 1.0
+EPSILON_DECAY = 0.995
+EPSILON_MIN = 0.0001
+```
 
-On CartPole-v1:
-- **DQN**: ~450-500 average reward after 1000-1200 episodes
-- **Double DQN**: Similar or slightly better with more stable learning
-- **SARSA**: ~450-500 average reward, may be more conservative
+### Customization Examples
 
-All agents should solve the environment (achieve 475+ average reward consistently).
+**Train for more episodes:**
+```python
+NUM_EPISODES = 2000
+EPSILON_DECAY = 0.997  # Slower decay for longer training
+```
+
+**Use larger network:**
+```python
+HIDDEN_DIM_1 = 128
+HIDDEN_DIM_2 = 128
+```
+
+**Different environment:**
+```python
+ENV_NAME = "LunarLander-v2"
+INPUT_DIM = 8
+OUTPUT_DIM = 4
+```
 
 ## File Descriptions
 
@@ -184,30 +206,6 @@ All agents should solve the environment (achieve 475+ average reward consistentl
 - **environment/cartpole_env.py**: Environment wrapper for CartPole
 - **utils/replay_buffer.py**: Experience replay buffer (used by DQN/Double DQN)
 - **utils/visualization.py**: Plotting and visualization utilities
-
-## Training Output
-
-During training, you'll see:
-- Progress bars with episode completion
-- Periodic logging of rewards and epsilon values
-- Model checkpoints saved every 100 episodes
-- Final model saved at completion
-- Training plots generated automatically
-
-## Evaluation Output
-
-When evaluating, you'll get:
-- Episode-by-episode performance
-- Visual rendering of agent behavior (optional)
-- Statistics: mean, std, max, min rewards
-- Episode length statistics
-
-## References
-
-1. **DQN**: [Human-level control through deep reinforcement learning](https://www.nature.com/articles/nature14236) (Mnih et al., 2015)
-2. **Double DQN**: [Deep Reinforcement Learning with Double Q-learning](https://arxiv.org/abs/1509.06461) (van Hasselt et al., 2015)
-3. **SARSA**: [Reinforcement Learning: An Introduction](http://incompleteideas.net/book/the-book-2nd.html) (Sutton & Barto, 2018)
-4. **Gymnasium**: https://gymnasium.farama.org/
 
 ## License
 
