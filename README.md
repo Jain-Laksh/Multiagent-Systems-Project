@@ -46,8 +46,11 @@ $$ \text{Loss} = \left( r + \gamma \max_{a'} Q(s', a'; \theta^-) - Q(s, a; \thet
 
 *   **DQN:** Uses a Target Network ($\theta^-$) and Experience Replay to stabilize training.
 *   **Double DQN:** Decouples selection and evaluation to reduce overestimation bias:
+
 $$ Y_t^{DDQN} = r + \gamma Q(s', \arg\max_{a} Q(s', a; \theta); \theta^-) $$
+
 *   **SARSA:** An **on-policy** algorithm that updates based on the action actually taken ($\epsilon$-greedy), making it "safer" but potentially slower:
+
 $$ Q(s, a) \leftarrow Q(s, a) + \alpha [r + \gamma Q(s', a') - Q(s, a)] $$
 
 ### 2. Policy-Based Methods
@@ -55,12 +58,16 @@ These methods directly parameterize the policy $\pi_\theta(a|s)$ and maximize th
 
 **The Policy Gradient Theorem:**
 We optimize parameters via gradient ascent using the Log-Derivative trick:
+
 $$ \nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta} \left[ \nabla_\theta \log \pi_\theta(a_t|s_t) G_t \right] $$
 
 *   **REINFORCE:** Uses the full Monte Carlo return $G_t$. High variance.
 *   **Baseline:** Subtracts a state-value baseline $b(s)$ to reduce variance without introducing bias:
+
 $$ \nabla_\theta J(\theta) \approx \sum \nabla_\theta \log \pi_\theta(a|s) (G_t - b(s)) $$
+
 *   **Actor-Critic:** Replaces the Monte Carlo return with a bootstrapped estimate from a Critic network $V_w(s)$, effectively approximating the Advantage function:
+
 $$ \delta_t = r + \gamma V_w(s') - V_w(s) $$
 
 ---
