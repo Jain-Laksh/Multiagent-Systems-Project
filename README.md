@@ -1,6 +1,8 @@
 # Comparative Analysis of Reinforcement Learning Agents
 
-![CartPole Agent](cart-pole.gif)
+<p align="center">
+    <img src="cart-pole.gif" alt="CartPole Agent">
+</p>
 
 ## The Team
 
