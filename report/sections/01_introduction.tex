@@ -1,0 +1,12 @@
+\section{Introduction}
+Reinforcement Learning (RL) is a paradigm of machine learning where an agent learns to make sequences of decisions by interacting with an environment to maximize a cumulative reward signal \cite{sutton2018reinforcement}. Unlike supervised learning, where the agent is provided with correct labels, an RL agent must learn through trial and error, balancing the exploration of new strategies with the exploitation of known rewards.
+
+This project focuses on the classic control problem, \textit{CartPole-v1} \cite{barto1983neuronlike}, a standard benchmark in the Gymnasium environment. The objective is to balance a pole attached to a moving cart by applying forces to the left or right. Despite its apparent simplicity, CartPole serves as an excellent testbed for analyzing the fundamental properties of RL algorithms, particularly convergence speed and stability.
+
+We implement and compare two major families of algorithms:
+\begin{enumerate}
+    \item \textbf{Value-Based Methods:} These methods estimate the value of being in a state (or taking an action) and derive a policy from these estimates. We examine the Deep Q-Network (DQN) \cite{mnih2015human}, its extension Double DQN \cite{van2016deep}, and the on-policy SARSA algorithm.
+    \item \textbf{Policy-Based Methods:} These methods directly parameterize and optimize the policy without consulting a value function for action selection. We examine the REINFORCE algorithm \cite{williams1992simple}, REINFORCE with Baseline, and the hybrid Actor-Critic architecture.
+\end{enumerate}
+
+Our analysis highlights the ``Four Pillars of RL": Optimization, Delayed Consequences, Exploration, and Generalization. We specifically investigate the stability of learning curves and the effectiveness of variance reduction techniques in policy gradients versus the bias introduced by bootstrapping in value-based methods.

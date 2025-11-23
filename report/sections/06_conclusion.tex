@@ -1,0 +1,12 @@
+\section{Conclusion}
+
+In this work, we conducted a comprehensive comparative analysis of reinforcement learning algorithms on the CartPole-v1 control problem. We implemented and evaluated three value-based methods (DQN, Double DQN, SARSA) and three policy-based methods (REINFORCE, REINFORCE with Baseline, Actor-Critic).
+
+Our findings align with fundamental RL theory:
+\begin{itemize}
+    \item \textbf{Variance Reduction is Key:} In policy gradients, the transition from pure Monte Carlo (REINFORCE) to bootstrapping (Actor-Critic) is essential for practical convergence speeds.
+    \item \textbf{Bias-Variance Trade-off:} While Actor-Critic introduces bias via bootstrapping, the reduction in variance allows for significantly faster learning than unbiased Monte Carlo methods.
+    \item \textbf{Addressing Overestimation:} Double DQN successfully mitigated the stability issues of standard DQN, providing the most robust performance among value-based candidates.
+\end{itemize}
+
+For the specific task of CartPole, the \textbf{Actor-Critic} architecture proved to be the most effective, balancing the stability of policy search with the efficiency of value estimation. Future work could extend this analysis to continuous action spaces using algorithms like PPO or DDPG, where policy-based methods traditionally excel.

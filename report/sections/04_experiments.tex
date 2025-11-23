@@ -1,0 +1,45 @@
+\section{Experimental Setup}
+
+All experiments were conducted on the \texttt{CartPole-v1} environment from the Gymnasium library. The goal is to keep the pole upright for as long as possible, with a maximum episode duration of 500 steps. The episode terminates if the pole angle exceeds $\pm 12^\circ$ or the cart position exceeds $\pm 2.4$ units.
+
+\subsection{Hyperparameter Configuration}
+Table \ref{tab:hyperparams} summarizes the final hyperparameters selected after tuning. A distinct difference in configuration was necessary for the two families of algorithms.
+
+\begin{table}[htbp]
+\caption{Hyperparameter Settings}
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Value-Based} & \textbf{Policy-Based} \\
+\hline
+Learning Rate (LR) & $1 \times 10^{-4}$ & Actor: $3 \times 10^{-4}$ \\
+ & & Critic: $1 \times 10^{-3}$ \\
+\hline
+Hidden Units & $64 \times 64$ & $128 \times 128$ \\
+\hline
+Gamma ($\gamma$) & 0.99 & 0.99 \\
+\hline
+Batch Size & 64 & N/A (Monte Carlo) \\
+\hline
+Memory Size & 10,000 & N/A \\
+\hline
+Soft Update ($\tau$) & 0.01 & N/A \\
+\hline
+Exploration ($\epsilon$) & $1.0 \to 0.001$ & Stochastic Policy \\
+\hline
+\end{tabular}
+\label{tab:hyperparams}
+\end{center}
+\end{table}
+
+\subsection{Stability and Catastrophic Forgetting}
+A critical observation during our experimentation was the sensitivity of policy-based methods to hyperparameter selection compared to value-based methods. 
+
+While DQN and SARSA showed robust convergence with standard hyperparameters, REINFORCE and Actor-Critic exhibited signs of \textit{catastrophic forgetting}—a phenomenon where the agent's performance dramatically collapses after a period of high rewards. Specifically, with higher learning rates or smaller network capacities (64 units), policy agents would solve the environment (reaching 500 reward) around episode 200-300, only to degrade to near-random performance by episode 400.
+
+To mitigate this, we:
+\begin{enumerate}
+    \item Increased the network capacity to 128 hidden units.
+    \item Tuned the learning rates, specifically using a lower rate for the Actor ($3 \times 10^{-4}$) compared to the Critic ($1 \times 10^{-3}$) to ensure policy updates did not outpace value estimation accuracy.
+    \item Limited the training horizon for policy methods to the point of convergence to prevent late-stage divergence.
+\end{enumerate}

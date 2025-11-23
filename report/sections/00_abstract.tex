@@ -1,0 +1,10 @@
+\begin{abstract}
+Reinforcement Learning (RL) provides a robust framework for solving sequential decision-making problems. In this work, we present a comparative analysis of six distinct RL algorithms applied to the classic control problem of CartPole-v1. We categorize these algorithms into two families: Value-Based methods (DQN, Double DQN, SARSA) and Policy-Based methods (REINFORCE, REINFORCE with Baseline, Actor-Critic). We investigate the trade-offs between on-policy and off-policy learning, as well as the impact of variance reduction techniques. Our empirical results demonstrate that while simple policy gradient methods suffer from high variance, the addition of a baseline and the Actor-Critic architecture significantly improves stability. Similarly, within value-based methods, we analyze the effectiveness of Double Q-learning in mitigating overestimation bias compared to standard DQN. The Actor-Critic agent demonstrated the most consistent convergence, balancing the sample efficiency of value methods with the stability of policy optimization.
+
+\vspace{0.5em}
+\noindent \textit{Code Repository:} \url{https://github.com/Jain-Laksh/Multiagent-Systems-Project}
+\end{abstract}
+
+\begin{IEEEkeywords}
+Reinforcement Learning, DQN, SARSA, Policy Gradient, Actor-Critic, CartPole
+\end{IEEEkeywords}

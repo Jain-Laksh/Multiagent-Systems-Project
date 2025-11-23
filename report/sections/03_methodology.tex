@@ -1,0 +1,31 @@
+\section{Methodology}
+
+In this section, we outline the neural network architectures and specific algorithmic implementations used for both value-based and policy-based agents.
+
+\subsection{Network Architectures}
+To ensure a fair comparison while acknowledging the differing representational needs of each algorithm, we utilized Multi-Layer Perceptrons (MLPs) for all function approximators.
+
+\subsubsection{Value-Based Networks}
+For DQN, Double DQN, and SARSA, the Q-network consists of an MLP with two hidden layers.
+\begin{itemize}
+    \item \textbf{Input Layer:} 4 units (State dimension).
+    \item \textbf{Hidden Layers:} Two layers of 64 neurons each, using ReLU activation.
+    \item \textbf{Output Layer:} 2 units (Action dimension), representing $Q(s, \text{left})$ and $Q(s, \text{right})$.
+\end{itemize}
+The relatively smaller network size (64 units) was found to be sufficient for the Q-function to converge without overfitting.
+
+\subsubsection{Policy-Based Networks}
+For REINFORCE and Actor-Critic, we observed that the policy requires a more complex representation to map states directly to action probabilities effectively.
+\begin{itemize}
+    \item \textbf{Actor Network:} Input dimension 4, two hidden layers of 128 neurons (ReLU), and a Softmax output layer for action probabilities.
+    \item \textbf{Critic Network (Baseline):} Input dimension 4, two hidden layers of 128 neurons (ReLU), and a linear output for state-value estimation $V(s)$.
+\end{itemize}
+We found that reducing the hidden size to 64 for policy methods resulted in poor convergence, indicating a need for higher capacity to capture the policy landscape.
+
+\subsection{Algorithmic Enhancements}
+To stabilize training, we incorporated standard deep RL techniques:
+\begin{itemize}
+    \item \textbf{Experience Replay (DQN/DDQN):} We utilized a replay buffer of capacity 10,000. Transitions $(s, a, r, s', d)$ are sampled uniformly (batch size 64) to break temporal correlations in the training data.
+    \item \textbf{Soft Target Updates:} Instead of hard updates, the target network parameters $\theta^-$ track the online network $\theta$ using a Polyak averaging coefficient $\tau=0.01$: $\theta^- \leftarrow \tau\theta + (1-\tau)\theta^-$.
+    \item \textbf{Optimizer:} We employed the Adam optimizer for all networks.
+\end{itemize}

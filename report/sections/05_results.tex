@@ -1,0 +1,61 @@
+\section{Results and Discussion}
+
+In this section, we analyze the training performance of the agents. We focus on three key metrics: convergence speed (episodes to reach maximum reward), stability (variance in rolling average), and peak performance.
+
+\subsection{Value-Based Agent Analysis}
+
+Figure \ref{fig:value_comparison} presents the learning curves for the three value-based agents. We utilize the rolling average of rewards (window size 100) to filter out high-frequency noise and visualize the underlying trend.
+
+\begin{figure*}[htbp]
+    \centering
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/value_based/dqn_rolling.png}
+        \caption{DQN Learning Curve}
+        \label{fig:dqn}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/value_based/ddqn_rolling.png}
+        \caption{Double DQN Learning Curve}
+        \label{fig:ddqn}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/value_based/sarsa_rolling.png}
+        \caption{SARSA Learning Curve}
+        \label{fig:sarsa}
+    \end{minipage}
+    \caption{Comparative analysis of Value-Based methods. Double DQN (Fig. \ref{fig:ddqn}) exhibits the smoothest ascent to the optimal reward, mitigating the instability seen in standard DQN (Fig. \ref{fig:dqn}). SARSA (Fig. \ref{fig:sarsa}) converges but with a more conservative trajectory.}
+    \label{fig:value_comparison}
+\end{figure*}
+
+\begin{enumerate}
+    \item \textbf{DQN (Fig. \ref{fig:dqn}):} The standard DQN agent successfully learns to solve the task, reaching the maximum reward of 500. However, the learning curve exhibits noticeable fluctuations between episodes 200 and 600. This instability is characteristic of the maximization bias inherent in Q-learning, where the \texttt{max} operator overestimates action values, leading to ``optimistic" but potentially suboptimal updates.
+    
+    \item \textbf{Double DQN (Fig. \ref{fig:ddqn}):} The effectiveness of decoupling action selection from evaluation is evident. The learning curve is significantly smoother than that of DQN. By reducing overestimation bias, the agent adopts a more stable policy update trajectory, reaching consistent solution-level performance with fewer dips in performance.
+    
+    \item \textbf{SARSA (Fig. \ref{fig:sarsa}):} As an on-policy algorithm, SARSA learns the value of the current exploratory policy ($\epsilon$-greedy). Its convergence is robust but slightly slower to reach the theoretical maximum compared to Double DQN. This is expected behavior; SARSA pays a ``safety cost" during training by accounting for the possibility of random exploration steps.
+\end{enumerate}
+
+\subsection{Policy-Based Agent Analysis}
+
+Figure \ref{fig:policy_comparison} compares the policy-gradient approaches directly.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/policy_based/policy_comparison.png}
+    \caption{Rolling Average Reward for Policy-Based Agents. The Actor-Critic architecture (Blue) demonstrates superior sample efficiency and stability compared to REINFORCE (Red) and REINFORCE with Baseline (Green).}
+    \label{fig:policy_comparison}
+\end{figure}
+
+The impact of variance reduction is the dominant factor here:
+\begin{itemize}
+    \item \textbf{REINFORCE:} The vanilla Monte Carlo approach (Red curve) is highly unstable. Without a baseline, the high variance in returns ($G_t$) causes the gradient updates to be noisy, requiring over 1000 episodes to show significant learning.
+    \item \textbf{Actor-Critic:} The Actor-Critic agent (Blue curve) is the clear top performer. By using a Critic to bootstrap value estimates, it performs low-variance updates at every time step. It solves the environment faster than both REINFORCE and the value-based methods.
+\end{itemize}
+
+\subsection{Overall Conclusion}
+While Double DQN offers the most stable performance among value-based methods, the \textbf{Actor-Critic} architecture proved to be the most efficient overall for CartPole-v1. It balances the stability of policy optimization with the sample efficiency of bootstrapping.

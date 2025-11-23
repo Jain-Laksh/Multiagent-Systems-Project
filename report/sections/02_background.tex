@@ -1,0 +1,53 @@
+\section{Theoretical Background}
+
+The problem is formalized as a Markov Decision Process (MDP), defined by the tuple $(S, A, P, R, \gamma)$, where $S$ is the state space, $A$ is the action space, $P(s'|s,a)$ is the transition probability, $R(s,a)$ is the reward function, and $\gamma \in [0,1]$ is the discount factor.
+
+\subsection{Value-Based Learning}
+Value-based methods aim to learn the Action-Value function $Q^\pi(s,a)$, which represents the expected discounted return starting from state $s$, taking action $a$, and following policy $\pi$:
+\begin{equation}
+    Q^\pi(s,a) = \mathbb{E}_\pi \left[ \sum_{k=0}^{\infty} \gamma^k R_{t+k+1} \mid S_t=s, A_t=a \right]
+\end{equation}
+
+\subsubsection{Q-Learning and DQN}
+Q-Learning is an off-policy algorithm that seeks to satisfy the Bellman Optimality Equation. It approximates the optimal value function $Q^*(s,a)$ utilizing a target based on the maximum possible future value:
+\begin{equation}
+    Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \delta_t
+\end{equation}
+where $\delta_t = R_{t+1} + \gamma \max_{a'} Q(S_{t+1}, a') - Q(S_t, A_t)$ is the TD error.
+Deep Q-Networks (DQN) stabilize this process using Experience Replay to break temporal correlations and a fixed Target Network to prevent the moving target problem \cite{mnih2015human}.
+
+\subsubsection{Double DQN}
+Standard DQN is known to overestimate action values because the maximization step ($\max_{a'}$) in the target tends to select overestimated values. Double DQN \cite{van2016deep} decouples selection from evaluation:
+\begin{equation}
+    Y_t^{DDQN} = R_{t+1} + \gamma Q_{target}(S_{t+1}, \arg\max_{a} Q_{online}(S_{t+1}, a))
+\end{equation}
+
+\subsubsection{SARSA}
+SARSA (State-Action-Reward-State-Action) is the on-policy counterpart to Q-learning. Instead of assuming the optimal next action, it updates based on the actual next action $A_{t+1}$ chosen by the current behavior policy (e.g., $\epsilon$-greedy):
+\begin{equation}
+    \delta_t = R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)
+\end{equation}
+This makes SARSA "safer" during training as it accounts for the agent's exploration.
+
+\subsection{Policy-Based Learning}
+Policy methods parameterize the policy $\pi_\theta(a|s)$ directly and optimize parameters $\theta$ via gradient ascent on the objective $J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[G_0]$.
+
+\subsubsection{Policy Gradient Theorem}
+The gradient of the objective can be estimated without a model of the environment dynamics \cite{sutton2018reinforcement}:
+\begin{equation}
+    \nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta} \left[ \nabla_\theta \log \pi_\theta(a_t|s_t) G_t \right]
+\end{equation}
+
+\subsubsection{REINFORCE and Baselines}
+The REINFORCE algorithm uses the Monte Carlo return $G_t$ as an unbiased estimate of the value. However, this estimator has high variance. To reduce variance without introducing bias, a state-dependent baseline $b(s)$ is subtracted from the return:
+\begin{equation}
+    \nabla_\theta J(\theta) \approx \sum_{t=0}^{T-1} \nabla_\theta \log \pi_\theta(a_t|s_t) (G_t - b(s_t))
+\end{equation}
+Commonly, the value function $V(s)$ serves as the baseline.
+
+\subsubsection{Actor-Critic}
+Actor-Critic methods combine the advantages of both approaches. The "Critic" learns a value function $V_w(s)$ to approximate the return (bootstrapping), reducing variance at the cost of some bias. The "Actor" updates the policy using the TD error from the Critic:
+\begin{equation}
+    \delta_t = R_{t+1} + \gamma V_w(S_{t+1}) - V_w(S_t)
+\end{equation}
+This $\delta_t$ serves as an estimate of the Advantage function $A(s,a)$.
