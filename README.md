@@ -10,7 +10,7 @@
 |:-----|:------------|:-------------|
 | **Laksh Jain** | 23110185 | Value-Based Agents (DQN, DDQN, SARSA) |
 | **Surriya Gokul** | 23110324 | Policy-Based Agents (REINFORCE, Actor-Critic) |
-| **Devansh Lodha** | 23110091 | Experimental Design, Analysis & Report |
+| **Devansh Lodha** | 23110091 | Analysis & Report |
 
 ---
 
