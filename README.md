@@ -1,8 +1,8 @@
 # Comparative Analysis of Reinforcement Learning Agents
 
-<p align="center">
-    <img src="cart-pole.gif" alt="CartPole Agent">
-</p>
+<div align="center">
+![CartPole Agent](cart-pole.gif)
+</div>
 
 ## The Team
 
@@ -66,7 +66,7 @@ $$ \nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta} \left[ \nabla_\theta \log \
 
 ---
 
-## 🛠️ Environment & Architecture
+## Environment & Architecture
 
 ### State Space (Input Dim: 4)
 | Index | Observation | Min | Max |
@@ -98,3 +98,32 @@ python train_dqn.py
 # Example: Train Actor-Critic
 cd "../Policy Based"
 python train_actor_critic.py
+```
+
+### To Compare All Agents
+Run the comparison script in the respective folder to generate comparative plots:
+
+```bash
+python compare_all_agents.py
+```
+
+### To Evaluate a Trained Model
+```bash
+python evaluate_dqn.py --model saved_models/dqn_model_final.pth --no-render
+```
+
+---
+
+## Results Summary
+
+*   **Stability:** **Actor-Critic** demonstrated the smoothest convergence, solving the environment efficiently.
+*   **Sample Efficiency:** **Double DQN** converged faster than standard DQN by mitigating maximization bias.
+*   **Variance:** **REINFORCE** showed high variance, which was successfully mitigated by adding a Baseline.
+
+---
+
+## References
+
+1.  Sutton, R. S., & Barto, A. G. (2018). *Reinforcement Learning: An Introduction*. MIT Press.
+2.  Mnih, V., et al. (2015). *Human-level control through deep reinforcement learning*. Nature.
+3.  Williams, R. J. (1992). *Simple statistical gradient-following algorithms for connectionist reinforcement learning*. Machine Learning.
