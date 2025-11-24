@@ -5,6 +5,7 @@ Main entry point for training the agent
 
 import os
 import numpy as np
+import torch
 from tqdm import tqdm
 
 from config import Config
@@ -19,6 +20,10 @@ def train():
     """
     # Initialize configuration
     config = Config()
+    
+    # Set random seeds for reproducibility
+    torch.manual_seed(config.SEED)
+    np.random.seed(config.SEED)
     
     # Create necessary directories
     os.makedirs(config.MODEL_SAVE_PATH, exist_ok=True)
@@ -40,7 +45,7 @@ def train():
     
     # Training loop
     for episode in tqdm(range(config.NUM_EPISODES), desc="Training Progress"):
-        state, _ = env.reset()
+        state, _ = env.reset(seed=config.SEED + episode)
         done = False
         total_reward = 0
         step_count = 0

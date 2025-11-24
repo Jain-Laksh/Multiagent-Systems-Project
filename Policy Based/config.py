@@ -26,6 +26,7 @@ class Config:
     # Training settings
     NUM_EPISODES = 200  # Match the reference script
     MAX_STEPS_PER_EPISODE = 500
+    SEED = 42  # Random seed for reproducibility
     
     # Logging and saving
     LOG_INTERVAL = 50  # Print progress every N episodes
@@ -38,3 +39,4 @@ class Config:
     
     # Device settings
     DEVICE = "cuda"  # Use "cuda" if available, else "cpu"
+
