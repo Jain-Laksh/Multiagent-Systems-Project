@@ -52,12 +52,8 @@ saved_models/
 checkpoint*
 
 # Plots and outputs
-plots/
 outputs/
 logs/
-*.png
-*.jpg
-*.jpeg
 
 # OS files
 .DS_Store

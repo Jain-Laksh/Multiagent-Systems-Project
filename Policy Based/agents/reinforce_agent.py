@@ -1,60 +1,164 @@
-import torch
-import torch.optim as optim
+"""
+REINFORCE Agent implementation (Monte Carlo Policy Gradient)
+Uses complete episode returns to update the policy
+"""
 
-from models.policy import PolicyNet
-from utils.helpers import one_hot
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+from torch.distributions import Categorical
+
+from models.policy_network import PolicyNetwork
 
 
 class REINFORCEAgent:
+    """
+    REINFORCE Agent (Vanilla Policy Gradient)
+    Updates policy using Monte Carlo returns
+    """
     
-    def __init__(self, env, lr=1e-3, gamma=0.99, hidden=128, device='cpu'):
-        self.env = env
-        self.gamma = gamma
-        self.device = device
+    def __init__(self, input_dim, output_dim, config):
+        """
+        Initialize the REINFORCE agent
         
-        n_states = env.n_states
-        n_actions = env.n_actions
+        Args:
+            input_dim (int): State space dimension
+            output_dim (int): Action space dimension
+            config: Configuration object with hyperparameters
+        """
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.config = config
         
-        self.policy = PolicyNet(n_states, n_actions, hidden).to(device)
-        self.opt = optim.Adam(self.policy.parameters(), lr=lr)
-
-    def select_action(self, state):
-        state_tensor = torch.tensor(one_hot(self.env.n_states, state)).unsqueeze(0).to(self.device)
-        logits = self.policy(state_tensor)
-        action_probs = torch.softmax(logits, dim=-1).squeeze(0)
+        # Set device
+        self.device = torch.device(
+            config.DEVICE if torch.cuda.is_available() and config.DEVICE == "cuda" else "cpu"
+        )
+        print(f"Using device: {self.device}")
         
-        distribution = torch.distributions.Categorical(action_probs)
-        action = distribution.sample()
+        # Initialize policy network
+        self.policy = PolicyNetwork(
+            input_dim,
+            output_dim,
+            config.HIDDEN_DIM_1,
+            config.HIDDEN_DIM_2
+        ).to(self.device)
         
-        return action.item(), distribution.log_prob(action)
-
-    def train_episode(self):
-        state = self.env.reset()
-        trajectory = []
-        done = False
-        episode_reward = 0.0
+        # Initialize optimizer
+        self.optimizer = optim.Adam(self.policy.parameters(), lr=config.ACTOR_LEARNING_RATE)
         
-        while not done:
-            action, log_prob = self.select_action(state)
-            next_state, reward, done, _ = self.env.step(action)
-            trajectory.append((state, action, reward, log_prob))
-            episode_reward += reward
-            state = next_state
-
-        monte_carlo_returns = []
-        cumulative_return = 0.0
-        for _, _, reward, _ in reversed(trajectory):
-            cumulative_return = reward + self.gamma * cumulative_return
-            monte_carlo_returns.insert(0, cumulative_return)
+        # Hyperparameters
+        self.gamma = config.GAMMA
         
-        returns_tensor = torch.tensor(monte_carlo_returns, dtype=torch.float32).to(self.device)
-
-        policy_gradient_loss = 0.0
-        for (_, _, _, log_prob), return_value in zip(trajectory, returns_tensor):
-            policy_gradient_loss = policy_gradient_loss - log_prob * return_value
-
-        self.opt.zero_grad()
-        policy_gradient_loss.backward()
-        self.opt.step()
-
-        return episode_reward
+        # Episode memory
+        self.log_probs = []
+        self.rewards = []
+    
+    def select_action(self, state, training=True):
+        """
+        Select an action based on the current policy
+        
+        Args:
+            state: Current state
+            training (bool): Whether in training mode (sample from distribution) or evaluation mode (greedy)
+            
+        Returns:
+            int: Selected action
+        """
+        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
+        
+        action_probs = self.policy(state_tensor)
+        
+        # Create categorical distribution
+        dist = Categorical(action_probs)
+        
+        if training:
+            # Sample action from distribution
+            action = dist.sample()
+            log_prob = dist.log_prob(action)
+            self.log_probs.append(log_prob)
+            return action.item()
+        else:
+            # Greedy action selection
+            action = torch.argmax(action_probs)
+            return action.item()
+    
+    def store_reward(self, reward):
+        """
+        Store reward for current step
+        
+        Args:
+            reward: Reward received
+        """
+        self.rewards.append(reward)
+    
+    def train_step(self):
+        """
+        Perform one training step at the end of an episode
+        Uses Monte Carlo returns with discounting
+        
+        Returns:
+            float: Policy loss
+        """
+        # Calculate returns (discounted cumulative rewards)
+        returns = []
+        G = 0
+        for reward in reversed(self.rewards):
+            G = reward + self.gamma * G
+            returns.insert(0, G)
+        
+        # Convert to tensor and normalize
+        returns = torch.tensor(returns, dtype=torch.float32).to(self.device)
+        # Normalize returns (Crucial for Vanilla REINFORCE stability)
+        returns = (returns - returns.mean()) / (returns.std() + 1e-9)
+        
+        # Calculate policy loss
+        policy_loss = []
+        for log_prob, G in zip(self.log_probs, returns):
+            policy_loss.append(-log_prob * G)
+        
+        policy_loss = torch.stack(policy_loss).sum()
+        
+        # Backpropagation
+        self.optimizer.zero_grad()
+        policy_loss.backward()
+        self.optimizer.step()
+        
+        # Clear episode memory
+        self.log_probs = []
+        self.rewards = []
+        
+        return policy_loss.item()
+    
+    def reset_episode(self):
+        """
+        Reset episode memory (log probs and rewards)
+        """
+        self.log_probs = []
+        self.rewards = []
+    
+    def save_model(self, filepath):
+        """
+        Save the policy network
+        
+        Args:
+            filepath (str): Path to save the model
+        """
+        torch.save({
+            'policy_state_dict': self.policy.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict()
+        }, filepath)
+        print(f"Model saved to {filepath}")
+    
+    def load_model(self, filepath):
+        """
+        Load saved policy network
+        
+        Args:
+            filepath (str): Path to the saved model
+        """
+        checkpoint = torch.load(filepath, map_location=self.device)
+        self.policy.load_state_dict(checkpoint['policy_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        print(f"Model loaded from {filepath}")
